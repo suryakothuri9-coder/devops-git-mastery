@@ -1,0 +1,40 @@
+name: CI/CD - Production
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: ./app/hello.sh
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests
+        run: echo "Run tests"; exit 0
+
+#  scan-secrets:
+#   runs-on: ubuntu-latest
+#  needs: build
+# steps:
+#  - uses: actions/checkout@v4
+# - uses: zricethezav/gitleaks-action@v2
+#  with:
+#		github-token: ${{ secrets.GITHUB_TOKEN }}
+#		args: --verbose --redact --no-git -s .
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: [test]
+    environment: production  # manual approval if configured
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to PRODUCTION
+        run: echo "Deploying to production..."

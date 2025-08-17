@@ -8,4 +8,3 @@ provider "aws" {
 
 variable "region" { type = string  default = "eu-west-2" }
 output "whoami" { value = "terraform-connected" }
-
