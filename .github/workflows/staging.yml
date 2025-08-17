@@ -1,0 +1,38 @@
+name: CI/CD - Staging
+on:
+  push: { branches: [develop] }
+  pull_request: { branches: [develop] }
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: ./app/hello.sh
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests
+        run: echo "Run tests"; exit 0
+
+  scan-secrets:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - uses: zricethezav/gitleaks-action@v2
+        with: { args: "--verbose --redact --no-git -s ." }
+
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [test, scan-secrets]
+    environment: staging
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to STAGING
+        run: echo "Deploying to staging..."
